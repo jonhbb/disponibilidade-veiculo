@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidade do Veículo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        h2 {
+            color: #333;
+        }
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .status {
+            font-size: 18px;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .disponivel {
+            background: #d4edda;
+            color: #155724;
+        }
+        .ocupado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .horarios {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Verificar Disponibilidade do Veículo</h2>
+        <label for="date">Escolha a Data:</label>
+        <input type="date" id="date">
+        <button onclick="checkAvailability()">Verificar</button>
+
+        <div id="result" class="status"></div>
+        <div id="horarios" class="horarios"></div>
+    </div>
+
+    <script>
+        const API_KEY = "SUA_API_KEY_AQUI";
+        const CALENDAR_ID = "SEU_CALENDAR_ID_AQUI"; // Substitua pelo ID da agenda do veículo
+
+        async function checkAvailability() {
+            const dateInput = document.getElementById("date").value;
+            if (!dateInput) {
+                alert("Por favor, selecione uma data.");
+                return;
+            }
+
+            const startDate = new Date(dateInput);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(dateInput);
+            endDate.setHours(23, 59, 59, 999);
+
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&timeMin=${startDate.toISOString()}&timeMax=${endDate.toISOString()}`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const resultElement = document.getElementById("result");
+            const horariosElement = document.getElementById("horarios");
+
+            if (data.items && data.items.length > 0) {
+                let horarios = data.items.map(event => {
+                    let startTime = new Date(event.start.dateTime).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+                    let endTime = new Date(event.end.dateTime).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+                    return `${startTime} - ${endTime}`;
+                }).join("<br>");
+
+                resultElement.textContent = "❌ Veículo Ocupado nesta data!";
+                resultElement.className = "status ocupado";
+                
+                horariosElement.innerHTML = `<strong>Horários Agendados:</strong><br>${horarios}`;
+                horariosElement.style.display = "block";
+            } else {
+                resultElement.textContent = "✅ Veículo Disponível!";
+                resultElement.className = "status disponivel";
+                horariosElement.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
