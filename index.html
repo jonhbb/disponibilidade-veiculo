@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidade do Veículo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .horarios {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            text-align: left;
+        }
+
+        .ocupado {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #d9534f;
+            padding: 10px;
+        }
+
+        .loading {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            display: none;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+            input, button {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Verificar Disponibilidade do Veículo</h2>
+        <label for="date">Escolha a Data:</label>
+        <input type="date" id="date">
+        <button onclick="checkAvailability()">Verificar</button>
+        <p id="loading" class="loading">🔄 Buscando horários...</p>
+
+        <div id="horarios" class="horarios"></div>
+    </div>
+
+    <script>
+        const API_KEY = "SUA_API_KEY_AQUI";
+        const CALENDAR_ID = "SEU_CALENDAR_ID_AQUI"; 
+
+        async function checkAvailability() {
+            const dateInput = document.getElementById("date").value;
+            if (!dateInput) {
+                alert("Por favor, selecione uma data.");
+                return;
+            }
+
+            const horariosElement = document.getElementById("horarios");
+            const loadingElement = document.getElementById("loading");
+
+            // Exibir mensagem de carregamento
+            horariosElement.style.display = "none";
+            loadingElement.style.display = "block";
+
+            const startDate = new Date(dateInput);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(dateInput);
+            endDate.setHours(23, 59, 59, 999);
+
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&timeMin=${startDate.toISOString()}&timeMax=${endDate.toISOString()}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // Esconder a mensagem de carregamento
+                loadingElement.style.display = "none";
+
+                if (data.items && data.items.length > 0) {
+                    let horariosOcupados = data.items.map(event => {
+                        let startTime = new Date(event.start.dateTime).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+                        let endTime = new Date(event.end.dateTime).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+                        return `<li>${startTime} - ${endTime}</li>`;
+                    });
+
+                    horariosElement.innerHTML = `<strong>Horários Ocupados:</strong><ul>${horariosOcupados.join("")}</ul>`;
+                    horariosElement.className = "horarios ocupado";
+                    horariosElement.style.display = "block";
+                } else {
+                    horariosElement.innerHTML = "✅ Veículo disponível!";
+                    horariosElement.style.background = "#d4edda";
+                    horariosElement.style.color = "#155724";
+                    horariosElement.style.padding = "10px";
+                    horariosElement.style.borderLeft = "5px solid #28a745";
+                    horariosElement.style.display = "block";
+                }
+            } catch (error) {
+                loadingElement.style.display = "none";
+                horariosElement.innerHTML = "⚠ Erro ao buscar dados!";
+                horariosElement.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
