@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidade do Veículo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .horarios {
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+        .horarios.ocupado {
+            color: red;
+        }
+        .horarios.disponivel {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Verificar Disponibilidade do Veículo</h2>
+        <label for="date">Escolha a Data:</label>
+        <input type="date" id="date">
+        <button onclick="verificarDisponibilidade()">Verificar</button>
+
+        <div id="horarios" class="horarios"></div>
+    </div>
+
+    <script>
+        async function verificarDisponibilidade() {
+            const dateInput = document.getElementById("date").value;
+            const horariosElement = document.getElementById("horarios");
+
+            if (!dateInput) {
+                alert("Por favor, selecione uma data.");
+                return;
+            }
+
+            horariosElement.style.display = "none";
+            horariosElement.innerHTML = "Verificando...";
+
+            try {
+                // URL do seu calendário ICS público
+                const ICAL_URL = "https://calendar.google.com/calendar/ical/pmph68s46tke37rn4jvruluun0%40group.calendar.google.com/public/basic.ics";
+                
+                // Buscando o arquivo ICS
+                const response = await fetch(ICAL_URL);
+                const data = await response.text();
+
+                // Convertendo o ICS para JSON
+                const eventos = parseICS(data);
+                const eventosNoDia = eventos.filter(evento => {
+                    const eventoData = new Date(evento.start).toISOString().split("T")[0];
+                    return eventoData === dateInput;
+                });
+
+                if (eventosNoDia.length > 0) {
+                    const horariosOcupados = eventosNoDia.map(evento =>
+                        `⛔ ${new Date(evento.start).toLocaleTimeString()} - ${new Date(evento.end).toLocaleTimeString()}`
+                    ).join("<br>");
+
+                    horariosElement.innerHTML = `<strong>Horários Ocupados:</strong><br>${horariosOcupados}`;
+                    horariosElement.className = "horarios ocupado";
+                } else {
+                    horariosElement.innerHTML = "✅ Veículo disponível!";
+                    horariosElement.className = "horarios disponivel";
+                }
+
+                horariosElement.style.display = "block";
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+                horariosElement.innerHTML = "⚠ Erro ao buscar dados!";
+                horariosElement.className = "horarios";
+                horariosElement.style.display = "block";
+            }
+        }
+
+        function parseICS(icsData) {
+            const events = [];
+            const lines = icsData.split("\n");
+            let currentEvent = null;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (line.startsWith("BEGIN:VEVENT")) {
+                    currentEvent = {};
+                } else if (line.startsWith("END:VEVENT")) {
+                    events.push(currentEvent);
+                    currentEvent = null;
+                } else if (currentEvent) {
+                    const [key, ...valueParts] = line.split(":");
+                    const value = valueParts.join(":");
+
+                    if (key.startsWith("DTSTART")) {
+                        currentEvent.start = parseDateFromICS(value);
+                    } else if (key.startsWith("DTEND")) {
+                        currentEvent.end = parseDateFromICS(value);
+                    } else if (key === "SUMMARY") {
+                        currentEvent.summary = value;
+                    }
+                }
+            }
+            return events;
+        }
+
+        function parseDateFromICS(dateStr) {
+            const match = dateStr.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?/);
+            if (match) {
+                return new Date(
+                    Date.UTC(
+                        parseInt(match[1]), // Ano
+                        parseInt(match[2]) - 1, // Mês (base 0)
+                        parseInt(match[3]), // Dia
+                        parseInt(match[4]), // Hora
+                        parseInt(match[5]), // Minuto
+                        parseInt(match[6])  // Segundo
+                    )
+                );
+            }
+            return null;
+        }
+    </script>
+
+</body>
+</html>
