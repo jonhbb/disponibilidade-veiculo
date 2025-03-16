@@ -46,40 +46,61 @@
             margin-top: 15px;
         }
         h2 {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            font-size: 1.8em;
+            margin-bottom: 5px;
         }
-        h2::before {
-            content: '\1F697'; /* Ícone de carro */
-            font-size: 1.5em;
+        .subtitulo {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 15px;
         }
-        .highlight {
-            background-color: #d9534f !important; /* Vermelho chamativo */
-            color: white !important;
-            font-weight: bold;
-            padding: 5px;
-            border-radius: 5px;
+        .calendar-container {
+            overflow: hidden;
+            position: relative;
+        }
+        .calendar-container iframe {
+            transform: scale(1);
+            transform-origin: top;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            iframe {
+                height: 500px;
+            }
+        }
+        @media (orientation: landscape) {
+            .calendar-container {
+                height: 550px;
+                overflow: hidden;
+            }
+            .calendar-container iframe {
+                height: 650px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Disponibilidade do Veículo</h2>
+        <p class="subtitulo">Organize suas diligências com eficiência e precisão.</p>
         <p>Selecione uma semana para verificar os horários disponíveis:</p>
         <select id="semanaSelecionada">
             <option value="0">Semana Atual</option>
             <option value="1">Próxima Semana</option>
         </select>
         <button onclick="atualizarAgenda()">🔍 Verificar</button>
-        <p id="mensagem">🚗 Mostrando diligências da Semana Atual</p>
-        <iframe id="calendario" 
-            src="https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=cG1waDY4czQ2dGtlMzdybjRqdnJ1bHV1bjBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23AD1457" 
-            style="border-width:0;" 
-            frameborder="0" 
-            scrolling="no">
-        </iframe>
+        <p id="mensagem">🔍 Mostrando diligências da Semana Atual</p>
+        
+        <div class="calendar-container">
+            <iframe id="calendario" 
+                src="https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=cG1waDY4czQ2dGtlMzdybjRqdnJ1bHV1bjBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23AD1457" 
+                style="border-width:0;" 
+                frameborder="0" 
+                scrolling="no">
+            </iframe>
+        </div>
     </div>
 
     <script>
@@ -98,10 +119,9 @@
             calendario.src = `https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=cG1waDY4czQ2dGtlMzdybjRqdnJ1bHV1bjBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23AD1457&dates=${ano}${mes}${dia}/${ano}${mes}${(parseInt(dia) + 6).toString().padStart(2, '0')}`;
             
             const mensagens = [
-                "🚗 Mostrando diligências da Semana Atual", 
-                "🚗 Mostrando diligências da Próxima Semana"
+                "Semana Atual", "Próxima Semana"
             ];
-            mensagem.innerHTML = mensagens[semana];
+            mensagem.innerHTML = `🔍 Mostrando diligências da ${mensagens[semana]}`;
         }
     </script>
 </body>
