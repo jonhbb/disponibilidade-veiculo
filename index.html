@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidade do Veículo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: auto;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 0;
+            border-radius: 8px;
+        }
+        select, button {
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #mensagem {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Disponibilidade do Veículo</h2>
+        <p>Selecione uma semana para verificar os horários disponíveis:</p>
+        
+        <select id="semanaSelecionada">
+            <option value="0">Semana Atual</option>
+            <option value="1">Próxima Semana</option>
+            <option value="2">Daqui a Duas Semanas</option>
+        </select>
+        <button onclick="verificarDisponibilidade()">Verificar</button>
+        
+        <p id="mensagem">🔍 Selecione uma semana para visualizar os eventos.</p>
+        
+        <!-- Google Calendar incorporado -->
+        <iframe id="calendario" 
+            src="https://calendar.google.com/calendar/embed?src=pmph68s46tke37rn4jvruluun0%40group.calendar.google.com&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showPrint=0&showCalendars=0&showTabs=0&showDate=0&showNav=0"
+            frameborder="0" 
+            scrolling="no">
+        </iframe>
+    </div>
+
+    <script>
+        function verificarDisponibilidade() {
+            const semanaSelecionada = document.getElementById("semanaSelecionada").value;
+            const mensagem = document.getElementById("mensagem");
+            
+            let descricaoSemana = "";
+            if (semanaSelecionada == "0") descricaoSemana = "Semana Atual";
+            else if (semanaSelecionada == "1") descricaoSemana = "Próxima Semana";
+            else if (semanaSelecionada == "2") descricaoSemana = "Daqui a Duas Semanas";
+            
+            mensagem.innerHTML = `🔍 Mostrando eventos de ${descricaoSemana}`;
+        }
+    </script>
+</body>
+</html>
