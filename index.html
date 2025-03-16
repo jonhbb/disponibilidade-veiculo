@@ -50,12 +50,17 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            border-bottom: 2px solid #ccc; /* Linha sutil no título */
-            padding-bottom: 10px;
         }
         h2::before {
             content: '\1F697'; /* Ícone de carro */
             font-size: 1.5em;
+        }
+        .highlight {
+            background-color: #d9534f !important; /* Vermelho chamativo */
+            color: white !important;
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -67,10 +72,10 @@
             <option value="0">Semana Atual</option>
             <option value="1">Próxima Semana</option>
         </select>
-        <button onclick="atualizarAgenda()">Verificar</button>
-        <p id="mensagem">🔍 Mostrando eventos da Semana Atual</p>
+        <button onclick="atualizarAgenda()">🔍 Verificar</button>
+        <p id="mensagem">🚗 Mostrando diligências da Semana Atual</p>
         <iframe id="calendario" 
-            src="https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=cG1waDY4czQ2dGtlMzdybjRqdnJ1bHV1bjBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23FFFFFF" 
+            src="https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=cG1waDY4czQ2dGtlMzdybjRqdnJ1bHV1bjBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23AD1457" 
             style="border-width:0;" 
             frameborder="0" 
             scrolling="no">
@@ -90,29 +95,14 @@
             let mes = (dataBase.getMonth() + 1).toString().padStart(2, '0');
             let dia = dataBase.getDate().toString().padStart(2, '0');
             
-            calendario.src = `https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=cG1waDY4czQ2dGtlMzdybjRqdnJ1bHV1bjBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23FFFFFF&dates=${ano}${mes}${dia}/${ano}${mes}${(parseInt(dia) + 6).toString().padStart(2, '0')}`;
+            calendario.src = `https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FSao_Paulo&mode=WEEK&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=cG1waDY4czQ2dGtlMzdybjRqdnJ1bHV1bjBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23AD1457&dates=${ano}${mes}${dia}/${ano}${mes}${(parseInt(dia) + 6).toString().padStart(2, '0')}`;
             
             const mensagens = [
-                "Semana Atual", "Próxima Semana"
+                "🚗 Mostrando diligências da Semana Atual", 
+                "🚗 Mostrando diligências da Próxima Semana"
             ];
-            mensagem.innerHTML = `🔍 Mostrando eventos de ${mensagens[semana]}`;
+            mensagem.innerHTML = mensagens[semana];
         }
-
-        // Ajustar o scroll do iFrame para exibir apenas horários entre 9h e 17h
-        function ajustarScrollIframe() {
-            const iframe = document.getElementById('calendario');
-            iframe.onload = function() {
-                const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                setTimeout(() => {
-                    const scrollableElement = innerDoc.querySelector('.tEhMVd'); // Ajuste conforme a estrutura do Google Agenda
-                    if (scrollableElement) {
-                        scrollableElement.scrollTop = 300; // Ajuste para iniciar o scroll às 9h
-                    }
-                }, 1000);
-            };
-        }
-
-        ajustarScrollIframe();
     </script>
 </body>
 </html>
